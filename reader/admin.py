@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from reader.models import Book, ReadingSession
+
+admin.site.register(Book)
+admin.site.register(ReadingSession)

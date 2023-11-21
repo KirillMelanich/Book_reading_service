@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_save
@@ -15,6 +17,11 @@ class Book(models.Model):
 
     def __str__(self):
         return f"{self.id}"
+
+    def total_reading_time_for_user(self, user):
+        sessions = ReadingSession.objects.filter(user=user, book=self, end_time__isnull=False)
+        total_duration = sum((session.calculate_duration() for session in sessions), timedelta())
+        return total_duration
 
 
 class ReadingSession(models.Model):

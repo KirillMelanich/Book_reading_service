@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 
 class Book(models.Model):
@@ -13,11 +14,11 @@ class Book(models.Model):
     long_description = models.TextField()
 
     def __str__(self):
-        return f"'{self.title}' - {self.author}"
+        return f"{self.id}"
 
 
 class ReadingSession(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(null=True, blank=True)
@@ -32,9 +33,20 @@ class ReadingSession(models.Model):
             self.book.last_time_read = self.end_time
             self.book.save()
 
+    def stop_reading(self):
+        if not self.end_time:
+            self.end_time = timezone.now()
+            self.save()
+
     def save(self, *args, **kwargs):
+        if not self.pk:
+            # Check if the user already has an active session for this book
+            active_sessions = ReadingSession.objects.filter(user=self.user, book=self.book, end_time=None)
+            if active_sessions.exists():
+                # If there is an active session, stop it before starting a new one
+                active_sessions.first().stop_reading()
+
         super().save(*args, **kwargs)
-        self.update_last_time_read()
 
 
 @receiver(post_save, sender=ReadingSession)

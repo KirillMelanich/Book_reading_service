@@ -14,7 +14,7 @@ class BookDetailSerializer(BookSerializer):
 
     class Meta:
         model = Book
-        fields = ("id", "title", "author", "year_of_publishing", "long_description")
+        fields = ("id", "title", "author", "year_of_publishing", "last_time_read", "long_description")
 
 
 class ReadingSessionSerializer(serializers.ModelSerializer):
@@ -22,7 +22,7 @@ class ReadingSessionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ReadingSession
-        fields = '__all__'
+        exclude = ('user',)  # Exclude the 'user' field
         read_only_fields = ("end_time", )
 
     def get_duration(self, obj):

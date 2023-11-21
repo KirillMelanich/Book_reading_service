@@ -5,12 +5,25 @@ from .models import Book, ReadingSession
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = '__all__'
+        fields = "__all__"
+        read_only_fields = ("last_time_read", )
+        extra_kwargs = {"long_description": {"write_only": True}}
+
+
+class BookDetailSerializer(BookSerializer):
+
+    class Meta:
+        model = Book
+        fields = ("id", "title", "author", "year_of_publishing", "long_description")
 
 
 class ReadingSessionSerializer(serializers.ModelSerializer):
-    duration = serializers.DurationField(read_only=True)
+    duration = serializers.SerializerMethodField()
 
     class Meta:
         model = ReadingSession
         fields = '__all__'
+        read_only_fields = ("end_time", )
+
+    def get_duration(self, obj):
+        return obj.calculate_duration()

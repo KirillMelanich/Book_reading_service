@@ -1,15 +1,10 @@
-from django.urls import include, path
-from rest_framework.routers import DefaultRouter
+from rest_framework import routers
 from .views import BookViewSet, ReadingSessionViewSet
 
+router = routers.DefaultRouter()
+router.register(r'books', BookViewSet)
+router.register(r'reading-sessions', ReadingSessionViewSet)
 
-router = DefaultRouter()
-
-router.register("book", BookViewSet, basename="book")
-router.register("reading-sessions", ReadingSessionViewSet, basename="reading-sessions")
-
-urlpatterns = [
-    path("", include(router.urls))
-]
+urlpatterns = router.urls
 
 app_name = "reader"

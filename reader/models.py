@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Sum
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -19,8 +20,12 @@ class Book(models.Model):
         return f"{self.id}"
 
     def total_reading_time_for_user(self, user):
-        sessions = ReadingSession.objects.filter(user=user, book=self, end_time__isnull=False)
-        total_duration = sum((session.calculate_duration() for session in sessions), timedelta())
+        sessions = ReadingSession.objects.filter(
+            user=user, book=self, end_time__isnull=False
+        )
+        total_duration = sum(
+            (session.calculate_duration() for session in sessions), timedelta()
+        )
         return total_duration
 
 
@@ -36,7 +41,9 @@ class ReadingSession(models.Model):
         return None
 
     def update_last_time_read(self):
-        if self.end_time and (not self.book.last_time_read or self.book.last_time_read < self.end_time):
+        if self.end_time and (
+            not self.book.last_time_read or self.book.last_time_read < self.end_time
+        ):
             self.book.last_time_read = self.end_time
             self.book.save()
 
@@ -50,7 +57,9 @@ class ReadingSession(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:
             # Check if the user already has an active session for this book
-            active_sessions = ReadingSession.objects.filter(user=self.user, book=self.book, end_time=None)
+            active_sessions = ReadingSession.objects.filter(
+                user=self.user, book=self.book, end_time=None
+            )
             if active_sessions.exists():
                 # If there is an active session, stop it before starting a new one
                 active_sessions.first().stop_reading()
@@ -67,11 +76,20 @@ class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     last_activity = models.DateTimeField(null=True, blank=True)
     number_of_reading_sessions = models.PositiveIntegerField(default=0)
+    total_reading_time = models.DurationField(default=timezone.timedelta)
 
     def update_reading_sessions_count(self):
         # Count the number of reading sessions for the user
         count = ReadingSession.objects.filter(user=self.user).count()
         self.number_of_reading_sessions = count
+
+        # Calculate the total reading time for the user
+        sessions = ReadingSession.objects.filter(user=self.user, end_time__isnull=False)
+        total_duration = sum(
+            (session.calculate_duration() for session in sessions), timedelta()
+        )
+        self.total_reading_time = total_duration
+
         self.save()
 
 

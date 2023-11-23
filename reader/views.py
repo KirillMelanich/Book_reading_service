@@ -5,7 +5,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Book, ReadingSession, Profile
-from .serializers import BookSerializer, ReadingSessionSerializer, BookDetailSerializer, ProfileSerializer
+from .serializers import (
+    BookSerializer,
+    ReadingSessionSerializer,
+    BookDetailSerializer,
+    ProfileSerializer,
+)
 
 
 class BookViewSet(viewsets.ModelViewSet):
@@ -34,13 +39,15 @@ class ReadingSessionViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         # Check if the user already has an active session and stop it
-        active_sessions = ReadingSession.objects.filter(user=request.user, end_time=None)
+        active_sessions = ReadingSession.objects.filter(
+            user=request.user, end_time=None
+        )
         if active_sessions.exists():
             active_sessions.first().stop_reading()
 
         return super().create(request, *args, **kwargs)
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=["post"])
     def stop_reading(self, request, pk=None):
         reading_session = self.get_object()
         reading_session.end_time = timezone.now()

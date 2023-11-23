@@ -1,5 +1,5 @@
 from django.utils import timezone
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
@@ -59,6 +59,14 @@ class ReadingSessionViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def stop_reading(self, request, pk=None):
         reading_session = self.get_object()
+
+        # Check if the reading session has already been completed
+        if reading_session.end_time:
+            return Response(
+                {"detail": "Reading session has already been completed."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         reading_session.end_time = timezone.now()
         reading_session.save()
 

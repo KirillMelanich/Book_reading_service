@@ -45,6 +45,10 @@ class ReadingSessionViewSet(viewsets.ModelViewSet):
         reading_session = self.get_object()
         reading_session.end_time = timezone.now()
         reading_session.save()
+
+        # Update the number_of_reading_sessions in the associated Profile
+        reading_session.user.profile.update_reading_sessions_count()
+
         serializer = ReadingSessionSerializer(reading_session)
         return Response(serializer.data)
 

@@ -1,12 +1,13 @@
 from django.utils import timezone
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 
 from .models import Book, ReadingSession, Profile
+from .permissions import IsAdminOrIfAuthentificatedReadOnly, IsOwnerOrReadOnly
 from .serializers import (
     BookSerializer,
     ReadingSessionSerializer,
@@ -25,6 +26,7 @@ class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     pagination_class = Pagination
+    permission_classes = (IsAdminOrIfAuthentificatedReadOnly, )
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -36,6 +38,7 @@ class ReadingSessionViewSet(viewsets.ModelViewSet):
     queryset = ReadingSession.objects.all()
     serializer_class = ReadingSessionSerializer
     pagination_class = Pagination
+    permission_classes = (IsOwnerOrReadOnly, )
 
     def perform_create(self, serializer):
         # Set the 'user' field based on the logged-in user
@@ -83,4 +86,4 @@ class ReadingSessionViewSet(viewsets.ModelViewSet):
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsOwnerOrReadOnly, )

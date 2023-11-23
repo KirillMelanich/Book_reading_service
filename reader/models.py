@@ -44,6 +44,8 @@ class ReadingSession(models.Model):
         if not self.end_time:
             self.end_time = timezone.now()
             self.save()
+            # # Update the number_of_reading_sessions in the associated Profile
+            # self.user.profile.update_reading_sessions_count()
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -59,3 +61,15 @@ class ReadingSession(models.Model):
 @receiver(post_save, sender=ReadingSession)
 def update_book_last_time_read(sender, instance, **kwargs):
     instance.update_last_time_read()
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    # last_activity = models.DateTimeField(default=None)
+    number_of_reading_sessions = models.PositiveIntegerField(default=0)
+
+    def update_reading_sessions_count(self):
+        # Count the number of reading sessions for the user
+        count = ReadingSession.objects.filter(user=self.user).count()
+        self.number_of_reading_sessions = count
+        self.save()

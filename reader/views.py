@@ -1,10 +1,11 @@
 from django.utils import timezone
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Book, ReadingSession
-from .serializers import BookSerializer, ReadingSessionSerializer, BookDetailSerializer
+from .models import Book, ReadingSession, Profile
+from .serializers import BookSerializer, ReadingSessionSerializer, BookDetailSerializer, ProfileSerializer
 
 
 class BookViewSet(viewsets.ModelViewSet):
@@ -25,6 +26,9 @@ class ReadingSessionViewSet(viewsets.ModelViewSet):
         # Set the 'user' field based on the logged-in user
         serializer.save(user=self.request.user)
 
+        # Update the number_of_reading_sessions in the associated Profile
+        self.request.user.profile.update_reading_sessions_count()
+
     def create(self, request, *args, **kwargs):
         # Check if the user already has an active session and stop it
         active_sessions = ReadingSession.objects.filter(user=request.user, end_time=None)
@@ -40,3 +44,9 @@ class ReadingSessionViewSet(viewsets.ModelViewSet):
         reading_session.save()
         serializer = ReadingSessionSerializer(reading_session)
         return Response(serializer.data)
+
+
+class ProfileViewSet(viewsets.ModelViewSet):
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]

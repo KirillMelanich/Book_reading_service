@@ -26,8 +26,11 @@ class ReadingSessionViewSet(viewsets.ModelViewSet):
         # Set the 'user' field based on the logged-in user
         serializer.save(user=self.request.user)
 
-        # Update the number_of_reading_sessions in the associated Profile
-        self.request.user.profile.update_reading_sessions_count()
+        # Update the number_of_reading_sessions and last_activity in the associated Profile
+        profile = self.request.user.profile
+        profile.update_reading_sessions_count()
+        profile.last_activity = serializer.instance.start_time
+        profile.save()
 
     def create(self, request, *args, **kwargs):
         # Check if the user already has an active session and stop it

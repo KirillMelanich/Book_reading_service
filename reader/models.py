@@ -65,7 +65,7 @@ def update_book_last_time_read(sender, instance, **kwargs):
 
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    # last_activity = models.DateTimeField(default=None)
+    last_activity = models.DateTimeField(null=True, blank=True)
     number_of_reading_sessions = models.PositiveIntegerField(default=0)
 
     def update_reading_sessions_count(self):
@@ -73,3 +73,9 @@ class Profile(models.Model):
         count = ReadingSession.objects.filter(user=self.user).count()
         self.number_of_reading_sessions = count
         self.save()
+
+
+@receiver(post_save, sender=ReadingSession)
+def update_profile_last_activity(sender, instance, **kwargs):
+    instance.user.profile.last_activity = instance.start_time
+    instance.user.profile.save()

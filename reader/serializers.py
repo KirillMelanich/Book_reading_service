@@ -39,5 +39,5 @@ class ReadingSessionSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ("user", "number_of_reading_sessions")
-        read_only_fields = ("number_of_reading_sessions",)
+        fields = ("user", "number_of_reading_sessions", "last_activity")
+        read_only_fields = ("number_of_reading_sessions", "last_activity")

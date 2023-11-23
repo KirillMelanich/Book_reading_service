@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.utils import timezone
 
@@ -76,13 +76,16 @@ class Profile(models.Model):
     last_activity = models.DateTimeField(null=True, blank=True)
     number_of_reading_sessions = models.PositiveIntegerField(default=0)
     total_reading_time = models.DurationField(default=timezone.timedelta)
+    last_book_read = models.ForeignKey(
+        "Book", null=True, blank=True, on_delete=models.SET_NULL
+    )
 
     def update_reading_sessions_count(self):
         # Count the number of reading sessions for the user
         count = ReadingSession.objects.filter(user=self.user).count()
         self.number_of_reading_sessions = count
 
-        # Calculate the total reading time for the user
+    def calculate_total_reading_time_for_user(self):
         sessions = ReadingSession.objects.filter(user=self.user, end_time__isnull=False)
         total_duration = sum(
             (session.calculate_duration() for session in sessions), timedelta()
@@ -91,8 +94,34 @@ class Profile(models.Model):
 
         self.save()
 
+    def get_last_book_read(self):
+        last_reading_session = ReadingSession.objects.filter(
+            user=self.user, end_time__isnull=False
+        ).order_by('-end_time').first()
+
+        if last_reading_session:
+            self.last_book_read = last_reading_session.book
+        else:
+            self.last_book_read = None
+
+        self.save()
+
 
 @receiver(post_save, sender=ReadingSession)
 def update_profile_last_activity(sender, instance, **kwargs):
     instance.user.profile.last_activity = instance.start_time
     instance.user.profile.save()
+
+
+# Signal to update the last_book_read when a ReadingSession is saved
+@receiver(post_save, sender=ReadingSession)
+def update_profile_last_book_read(sender, instance, **kwargs):
+    profile = instance.user.profile
+    profile.update_reading_sessions_count()
+
+
+# Signal to handle the deletion of a ReadingSession and update last_book_read accordingly
+@receiver(pre_delete, sender=ReadingSession)
+def handle_deleted_reading_session(sender, instance, **kwargs):
+    profile = instance.user.profile
+    profile.update_reading_sessions_count()

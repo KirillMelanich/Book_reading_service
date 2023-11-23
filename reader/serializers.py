@@ -60,9 +60,11 @@ class ProfileSerializer(serializers.ModelSerializer):
             "number_of_reading_sessions",
             "last_activity",
             "total_reading_time",
+            "last_book_read"
         )
         read_only_fields = (
             "number_of_reading_sessions",
             "last_activity",
             "total_reading_time",
+            "last_book_read"
         )

@@ -5,6 +5,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+
 from .models import Book, ReadingSession, Profile
 from .serializers import (
     BookSerializer,
@@ -43,6 +44,8 @@ class ReadingSessionViewSet(viewsets.ModelViewSet):
         # Update the number_of_reading_sessions and last_activity in the associated Profile
         profile = self.request.user.profile
         profile.update_reading_sessions_count()
+        profile.calculate_total_reading_time_for_user()
+        profile.get_last_book_read()
         profile.last_activity = serializer.instance.start_time
         profile.save()
 

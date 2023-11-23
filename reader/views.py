@@ -1,6 +1,7 @@
 from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -13,9 +14,16 @@ from .serializers import (
 )
 
 
+class Pagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = "page_size"
+    max_page_size = 100
+
+
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+    pagination_class = Pagination
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -26,6 +34,7 @@ class BookViewSet(viewsets.ModelViewSet):
 class ReadingSessionViewSet(viewsets.ModelViewSet):
     queryset = ReadingSession.objects.all()
     serializer_class = ReadingSessionSerializer
+    pagination_class = Pagination
 
     def perform_create(self, serializer):
         # Set the 'user' field based on the logged-in user

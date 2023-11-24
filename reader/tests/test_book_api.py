@@ -3,10 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
-from reader.models import Book, ReadingSession
-from django.utils import timezone
-from datetime import timedelta
-from reader.serializers import BookSerializer, BookDetailSerializer
+from reader.models import Book
 
 BOOK_URL = reverse("reader:book-list")
 

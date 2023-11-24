@@ -4,6 +4,8 @@ from .models import Book, ReadingSession, Profile
 
 class BookSerializer(serializers.ModelSerializer):
     total_reading_time = serializers.SerializerMethodField()
+    total_number_of_reading_sessions_for_all_users = serializers.SerializerMethodField()
+    total_reading_time_for_all_users = serializers.SerializerMethodField()
 
     class Meta:
         model = Book
@@ -14,15 +16,25 @@ class BookSerializer(serializers.ModelSerializer):
             "year_of_publishing",
             "last_time_read",
             "total_reading_time",
+            "total_number_of_reading_sessions_for_all_users",
+            "total_reading_time_for_all_users",
             "short_description",
             "long_description",
         )
-        read_only_fields = ("last_time_read", "total_reading_time")
+        read_only_fields = ("last_time_read", "total_reading_time", "total_number_of_reading_sessions_for_all_users", "total_reading_time_for_all_users",)
         extra_kwargs = {"long_description": {"write_only": True}}
 
     def get_total_reading_time(self, obj):
         user = self.context["request"].user
         return obj.total_reading_time_for_user(user)
+
+    @staticmethod
+    def get_total_number_of_reading_sessions_for_all_users(obj):
+        return obj.total_number_of_reading_sessions_for_all_users()
+
+    @staticmethod
+    def get_total_reading_time_for_all_users(obj):
+        return obj.total_reading_time_for_all_users()
 
 
 class BookDetailSerializer(BookSerializer):
@@ -36,6 +48,8 @@ class BookDetailSerializer(BookSerializer):
             "last_time_read",
             "total_reading_time",
             "long_description",
+            "total_number_of_reading_sessions_for_all_users",
+            "total_reading_time_for_all_users",
         )
 
 
@@ -47,7 +61,8 @@ class ReadingSessionSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ("end_time", "user")
 
-    def get_duration(self, obj):
+    @staticmethod
+    def get_duration(obj):
         return obj.calculate_duration()
 
 
@@ -67,3 +82,5 @@ class ProfileSerializer(serializers.ModelSerializer):
             "total_reading_time",
             "last_book_read",
         )
+
+

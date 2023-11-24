@@ -27,6 +27,16 @@ class Book(models.Model):
         )
         return total_duration
 
+    def total_number_of_reading_sessions_for_all_users(self):
+        return ReadingSession.objects.filter(book=self).count()
+
+    def total_reading_time_for_all_users(self):
+        sessions = ReadingSession.objects.filter(book=self, end_time__isnull=False)
+        total_duration = sum(
+            (session.calculate_duration() for session in sessions), timedelta()
+        )
+        return total_duration
+
 
 class ReadingSession(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -127,3 +137,4 @@ def update_profile_last_book_read(sender, instance, **kwargs):
 def handle_deleted_reading_session(sender, instance, **kwargs):
     profile = instance.user.profile
     profile.update_reading_sessions_count()
+

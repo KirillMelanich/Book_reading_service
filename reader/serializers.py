@@ -45,7 +45,6 @@ class ReadingSessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReadingSession
         fields = "__all__"
-        # exclude = ('user',)  # Exclude the 'user' field
         read_only_fields = ("end_time", "user")
 
     def get_duration(self, obj):
@@ -60,11 +59,11 @@ class ProfileSerializer(serializers.ModelSerializer):
             "number_of_reading_sessions",
             "last_activity",
             "total_reading_time",
-            "last_book_read"
+            "last_book_read",
         )
         read_only_fields = (
-            "number_of_reading_sessions",
+            "user" "number_of_reading_sessions",
             "last_activity",
             "total_reading_time",
-            "last_book_read"
+            "last_book_read",
         )

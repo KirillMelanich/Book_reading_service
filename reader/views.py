@@ -1,13 +1,12 @@
 from django.utils import timezone
-from rest_framework import viewsets, status, permissions
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 
 from .models import Book, ReadingSession, Profile
-from .permissions import IsAdminOrIfAuthentificatedReadOnly, IsOwnerOrReadOnly
+from .permissions import IsAdminOrIfAuthentificatedReadOnly
 from .serializers import (
     BookSerializer,
     ReadingSessionSerializer,
@@ -26,7 +25,7 @@ class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     pagination_class = Pagination
-    permission_classes = (IsAdminOrIfAuthentificatedReadOnly, )
+    permission_classes = (IsAdminOrIfAuthentificatedReadOnly,)
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -35,16 +34,17 @@ class BookViewSet(viewsets.ModelViewSet):
 
 
 class ReadingSessionViewSet(viewsets.ModelViewSet):
-    queryset = ReadingSession.objects.all()
     serializer_class = ReadingSessionSerializer
     pagination_class = Pagination
-    permission_classes = (IsOwnerOrReadOnly, )
+
+    def get_queryset(self):
+        return ReadingSession.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         # Set the 'user' field based on the logged-in user
         serializer.save(user=self.request.user)
 
-        # Update the number_of_reading_sessions and last_activity in the associated Profile
+        # Update the number_of_reading_sessions and last_activity in the associated Profile and total reading time
         profile = self.request.user.profile
         profile.update_reading_sessions_count()
         profile.calculate_total_reading_time_for_user()
@@ -83,7 +83,17 @@ class ReadingSessionViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class ProfileViewSet(viewsets.ModelViewSet):
-    queryset = Profile.objects.all()
+class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProfileSerializer
-    permission_classes = (IsOwnerOrReadOnly, )
+
+    def get_queryset(self):
+        # Only return the profile of the authenticated user
+        return Profile.objects.filter(user=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        # Automatically create a profile for the user upon registration
+        profile, created = Profile.objects.get_or_create(user=request.user)
+
+        # Retrieve and return the profile
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data)

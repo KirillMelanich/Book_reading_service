@@ -95,9 +95,11 @@ class Profile(models.Model):
         self.save()
 
     def get_last_book_read(self):
-        last_reading_session = ReadingSession.objects.filter(
-            user=self.user, end_time__isnull=False
-        ).order_by('-end_time').first()
+        last_reading_session = (
+            ReadingSession.objects.filter(user=self.user, end_time__isnull=False)
+            .order_by("-end_time")
+            .first()
+        )
 
         if last_reading_session:
             self.last_book_read = last_reading_session.book

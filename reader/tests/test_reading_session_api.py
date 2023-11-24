@@ -1,6 +1,9 @@
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 from reader.models import ReadingSession, Book, Profile
@@ -102,3 +105,71 @@ class ReadingSessionTestsAuthenticated(TestCase):
         # Assert that the user's profile is updated
         updated_profile = self.user.profile
         self.assertEqual(initial_profile.number_of_reading_sessions, updated_profile.number_of_reading_sessions)
+
+
+class ReadingSessionMethodsTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+        self.book = Book.objects.create(
+            title="Sample Book",
+            author="Sample Author",
+            year_of_publishing=2022,
+            short_description="Sample Short Description",
+            long_description="Sample Long Description",
+        )
+        self.profile = Profile.objects.create(user=self.user)
+        self.reading_session = ReadingSession.objects.create(
+            user=self.user,
+            book=self.book,
+            start_time=timezone.now(),
+            end_time=None,
+        )
+
+    def test_calculate_duration(self):
+        # Create a reading session with start and end times
+        session_with_duration = ReadingSession.objects.create(
+            user=self.user,
+            book=self.book,
+            start_time=timezone.now(),
+            end_time=timezone.now() + timedelta(hours=1),
+        )
+        calculated_duration = session_with_duration.calculate_duration()
+
+        # Allow a small time difference (e.g., 1 second) for comparison
+        allowed_difference = timedelta(seconds=1)
+        self.assertTrue(
+            timedelta(hours=1) - allowed_difference <= calculated_duration <= timedelta(hours=1) + allowed_difference
+        )
+
+        # Create a reading session without end time
+        self.assertIsNone(self.reading_session.calculate_duration())
+
+    def test_stop_reading(self):
+        # Create a reading session without end time
+        self.reading_session.stop_reading()
+
+        # Assert that the reading session's end time is set
+        self.assertIsNotNone(self.reading_session.end_time)
+
+        # Assert that the book's last_time_read is updated
+        self.assertEqual(self.book.last_time_read, self.reading_session.end_time)
+
+        # Create a reading session with end time
+        session_with_end_time = ReadingSession.objects.create(
+            user=self.user,
+            book=self.book,
+            start_time=timezone.now(),
+            end_time=timezone.now() - timedelta(days=1),
+        )
+
+        # Save the initial end time with microsecond precision
+        initial_end_time = session_with_end_time.end_time.replace(microsecond=0)
+
+        session_with_end_time.stop_reading()
+
+        # Assert that the reading session's end time is not updated
+        updated_end_time = session_with_end_time.end_time.replace(microsecond=0)
+        self.assertEqual(updated_end_time, initial_end_time)

@@ -109,7 +109,9 @@ class ProfileMethodsTests(TestCase):
         # Allow a small time difference (e.g., 1 second) for comparison
         allowed_difference = timedelta(seconds=1)
         self.assertTrue(
-            expected_duration - allowed_difference <= actual_duration <= expected_duration + allowed_difference
+            expected_duration - allowed_difference
+            <= actual_duration
+            <= expected_duration + allowed_difference
         )
 
     def test_get_last_book_read(self):

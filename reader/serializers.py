@@ -21,7 +21,12 @@ class BookSerializer(serializers.ModelSerializer):
             "short_description",
             "long_description",
         )
-        read_only_fields = ("last_time_read", "total_reading_time", "total_number_of_reading_sessions_for_all_users", "total_reading_time_for_all_users",)
+        read_only_fields = (
+            "last_time_read",
+            "total_reading_time",
+            "total_number_of_reading_sessions_for_all_users",
+            "total_reading_time_for_all_users",
+        )
         extra_kwargs = {"long_description": {"write_only": True}}
 
     def get_total_reading_time(self, obj):
@@ -82,5 +87,3 @@ class ProfileSerializer(serializers.ModelSerializer):
             "total_reading_time",
             "last_book_read",
         )
-
-

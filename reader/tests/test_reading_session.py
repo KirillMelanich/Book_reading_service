@@ -29,7 +29,6 @@ class ReadingSessionTestsUnauthenticated(TestCase):
         response = self.client.post(READING_SESSION_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-
         # Ensure unauthenticated user cannot delete reading sessions
         response = self.client.delete(detail_url(1))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -104,7 +103,10 @@ class ReadingSessionTestsAuthenticated(TestCase):
 
         # Assert that the user's profile is updated
         updated_profile = self.user.profile
-        self.assertEqual(initial_profile.number_of_reading_sessions, updated_profile.number_of_reading_sessions)
+        self.assertEqual(
+            initial_profile.number_of_reading_sessions,
+            updated_profile.number_of_reading_sessions,
+        )
 
 
 class ReadingSessionMethodsTests(TestCase):
@@ -141,7 +143,9 @@ class ReadingSessionMethodsTests(TestCase):
         # Allow a small time difference (e.g., 1 second) for comparison
         allowed_difference = timedelta(seconds=1)
         self.assertTrue(
-            timedelta(hours=1) - allowed_difference <= calculated_duration <= timedelta(hours=1) + allowed_difference
+            timedelta(hours=1) - allowed_difference
+            <= calculated_duration
+            <= timedelta(hours=1) + allowed_difference
         )
 
         # Create a reading session without end time

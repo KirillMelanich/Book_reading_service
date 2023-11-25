@@ -97,5 +97,3 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
         # Retrieve and return the profile
         serializer = self.get_serializer(profile)
         return Response(serializer.data)
-
-

@@ -135,4 +135,3 @@ def update_profile_last_book_read(sender, instance, **kwargs):
 def handle_deleted_reading_session(sender, instance, **kwargs):
     profile = instance.user.profile
     profile.update_reading_sessions_count()
-

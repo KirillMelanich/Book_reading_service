@@ -207,4 +207,3 @@ class AuthenticatedBookApiTests(TestCase):
 
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
-

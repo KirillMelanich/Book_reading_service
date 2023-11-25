@@ -20,7 +20,7 @@ This API allows an authorized user to read books and measure the time of reading
 - Docker
 - Debug Toolbar
 
-## Installation
+## Installation with Docker
 1. Clone the repository:
    ```shell
    git clone https://github.com/KirillMelanich/Book_reading_service
@@ -28,23 +28,32 @@ This API allows an authorized user to read books and measure the time of reading
 2. Launch project with docker-compose using terminal commands:
    ```shell
     docker-compose up
-    docker exec -it book_reading_service-app-1 python manage.py makemigrations
-    docker exec -it book_reading_service-app-1 python manage.py migrate
-    docker exec -it book_reading_service-app-1 python manage.py createsuperuser
 
-3. If not using docker navigate to the project directory and activate virtual environment:
+3. Create Superuser:
+   ```shell
+    docker exec -it book_reading_service-app-1 python manage.py createsuperuser   
+Don't forget to change 0.0.0.8000 port in your browser search line to 127.0.0.1
+
+## Installation without Docker
+1. Clone the repository:
+   ```shell
+   git clone https://github.com/KirillMelanich/Book_reading_service
+   
+2. If not using docker navigate to the project directory and activate virtual environment:
    ```shell
    cd crypto_staking_platform
    python -m venv venv
    venv\Scripts\activate (on Windows)
    source venv/bin/activate (on macOS)
 
-4. Use `.env_sample` file as a template and create `.env` file with your settings
+3. Use `.env_sample` file as a template and create `.env` file with your settings
     . Don't forget to change your database settings for your local database
 
-5. Run python manage.py runserver
-6. Create superuser:
+4. Run app
+   ```shell
+   python manage.py runserver
+5. Create superuser:
    ```shell
    python manage.py createsuperuser
    
-7. Enjoy Book Reading Service
+6. Enjoy Book Reading Service

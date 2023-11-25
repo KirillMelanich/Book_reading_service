@@ -22,7 +22,7 @@ class Pagination(PageNumberPagination):
 
 
 class BookViewSet(viewsets.ModelViewSet):
-    queryset = Book.objects.all()
+    queryset = Book.objects.all().select_related("last_book_read")
     serializer_class = BookSerializer
     pagination_class = Pagination
     permission_classes = (IsAdminOrIfAuthentificatedReadOnly,)
@@ -38,7 +38,9 @@ class ReadingSessionViewSet(viewsets.ModelViewSet):
     pagination_class = Pagination
 
     def get_queryset(self):
-        return ReadingSession.objects.filter(user=self.request.user)
+        return ReadingSession.objects.filter(user=self.request.user).select_related(
+            "book"
+        )
 
     def perform_create(self, serializer):
         # Set the 'user' field based on the logged-in user
@@ -88,7 +90,9 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         # Only return the profile of the authenticated user
-        return Profile.objects.filter(user=self.request.user)
+        return Profile.objects.filter(user=self.request.user).prefetch_related(
+            "last_book_read"
+        )
 
     def list(self, request, *args, **kwargs):
         # Automatically create a profile for the user upon registration

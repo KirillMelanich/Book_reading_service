@@ -60,8 +60,6 @@ class ReadingSession(models.Model):
         if not self.end_time:
             self.end_time = timezone.now()
             self.save()
-            # # Update the number_of_reading_sessions in the associated Profile
-            # self.user.profile.update_reading_sessions_count()
 
     def save(self, *args, **kwargs):
         if not self.pk:

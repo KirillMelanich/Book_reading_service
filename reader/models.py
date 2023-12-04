@@ -8,12 +8,12 @@ from django.utils import timezone
 
 
 class Book(models.Model):
-    title = models.CharField(max_length=255)
-    author = models.CharField(max_length=255)
-    year_of_publishing = models.PositiveIntegerField()
+    title = models.CharField(max_length=255, blank=False, null=False)
+    author = models.CharField(max_length=255, default="Unknown author")
+    year_of_publishing = models.PositiveIntegerField(blank=True)
     last_time_read = models.DateTimeField(null=True, blank=True)
-    short_description = models.TextField()
-    long_description = models.TextField()
+    short_description = models.TextField(null=True, blank=True)
+    long_description = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.id}"
@@ -92,6 +92,7 @@ class Profile(models.Model):
         # Count the number of reading sessions for the user
         count = ReadingSession.objects.filter(user=self.user).count()
         self.number_of_reading_sessions = count
+        self.save()
 
     def calculate_total_reading_time_for_user(self):
         sessions = ReadingSession.objects.filter(user=self.user, end_time__isnull=False)

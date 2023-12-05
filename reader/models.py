@@ -15,6 +15,9 @@ class Book(models.Model):
     short_description = models.TextField(null=True, blank=True)
     long_description = models.TextField(null=True, blank=True)
 
+    class Meta:
+        ordering = ["id"]
+
     def __str__(self):
         return f"{self.id}"
 
@@ -43,6 +46,9 @@ class ReadingSession(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["id"]
 
     def calculate_duration(self):
         if self.start_time and self.end_time:
@@ -92,6 +98,7 @@ class Profile(models.Model):
         # Count the number of reading sessions for the user
         count = ReadingSession.objects.filter(user=self.user).count()
         self.number_of_reading_sessions = count
+
         self.save()
 
     def calculate_total_reading_time_for_user(self):

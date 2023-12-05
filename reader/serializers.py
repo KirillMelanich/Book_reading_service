@@ -3,7 +3,7 @@ from .models import Book, ReadingSession, Profile
 
 
 class BookSerializer(serializers.ModelSerializer):
-    total_reading_time = serializers.SerializerMethodField()
+    total_reading_time_for_user = serializers.SerializerMethodField()
     total_number_of_reading_sessions_for_all_users = serializers.SerializerMethodField()
     total_reading_time_for_all_users = serializers.SerializerMethodField()
 
@@ -15,7 +15,7 @@ class BookSerializer(serializers.ModelSerializer):
             "author",
             "year_of_publishing",
             "last_time_read",
-            "total_reading_time",
+            "total_reading_time_for_user",
             "total_number_of_reading_sessions_for_all_users",
             "total_reading_time_for_all_users",
             "short_description",
@@ -23,13 +23,13 @@ class BookSerializer(serializers.ModelSerializer):
         )
         read_only_fields = (
             "last_time_read",
-            "total_reading_time",
+            "total_reading_time_for_user",
             "total_number_of_reading_sessions_for_all_users",
             "total_reading_time_for_all_users",
         )
         extra_kwargs = {"long_description": {"write_only": True}}
 
-    def get_total_reading_time(self, obj):
+    def get_total_reading_time_for_user(self, obj):
         user = self.context["request"].user
         return obj.total_reading_time_for_user(user)
 
@@ -51,7 +51,7 @@ class BookDetailSerializer(BookSerializer):
             "author",
             "year_of_publishing",
             "last_time_read",
-            "total_reading_time",
+            "total_reading_time_for_user",
             "long_description",
             "total_number_of_reading_sessions_for_all_users",
             "total_reading_time_for_all_users",
@@ -82,7 +82,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             "last_book_read",
         )
         read_only_fields = (
-            "user" "number_of_reading_sessions",
+            "user",
+            "number_of_reading_sessions",
             "last_activity",
             "total_reading_time",
             "last_book_read",

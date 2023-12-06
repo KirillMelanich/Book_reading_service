@@ -170,7 +170,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=300),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=5),  # in commercial project it must be 5min
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),  # in commercial project it must be 7days
     "ROTATE_REFRESH_TOKENS": False,
 }

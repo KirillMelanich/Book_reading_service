@@ -1,9 +1,9 @@
 from django.utils import timezone
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-
+from rest_framework.viewsets import GenericViewSet
 
 from .models import Book, ReadingSession, Profile
 from .permissions import IsAdminOrIfAuthentificatedReadOnly
@@ -33,7 +33,12 @@ class BookViewSet(viewsets.ModelViewSet):
         return BookSerializer
 
 
-class ReadingSessionViewSet(viewsets.ModelViewSet):
+class ReadingSessionViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    GenericViewSet,
+):
     serializer_class = ReadingSessionSerializer
     pagination_class = Pagination
 
@@ -91,4 +96,3 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         # Only return the profile of the authenticated user
         return Profile.objects.filter(user=self.request.user)
-

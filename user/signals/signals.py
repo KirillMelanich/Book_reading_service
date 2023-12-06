@@ -7,5 +7,5 @@ from reader.models import Profile
 @receiver(post_save, sender=User)
 # Creates a profile instance right after ner user is registered
 def create_profile(sender, instance, created, **kwargs):
-    if created:
+    if created and not Profile.objects.filter(user=instance).exists():
         Profile.objects.create(user=instance)

@@ -89,6 +89,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "last_book_read",
         )
 
+
 # create profile from serializers
 # Django channels
 # adding extra services

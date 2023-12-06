@@ -92,10 +92,3 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
         # Only return the profile of the authenticated user
         return Profile.objects.filter(user=self.request.user)
 
-    def list(self, request, *args, **kwargs):
-        # Automatically create a profile for the user upon registration
-        profile, created = Profile.objects.get_or_create(user=request.user)
-
-        # Retrieve and return the profile
-        serializer = self.get_serializer(profile)
-        return Response(serializer.data)

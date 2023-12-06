@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Sum
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.utils import timezone
@@ -107,6 +108,10 @@ class Profile(models.Model):
             (session.calculate_duration() for session in sessions), timedelta()
         )
         self.total_reading_time = total_duration
+
+        # total_duration = ReadingSession.objects.filter(
+        #     user=self.user, end_time__isnull=False
+        # ).aggregate(total_duration=Sum("duration"))["total_duration"] or timedelta()
 
         self.save()
 

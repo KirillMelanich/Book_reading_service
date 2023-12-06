@@ -2,9 +2,6 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Sum
-from django.db.models.signals import post_save, pre_delete
-from django.dispatch import receiver
 from django.utils import timezone
 
 
@@ -81,11 +78,6 @@ class ReadingSession(models.Model):
         super().save(*args, **kwargs)
 
 
-@receiver(post_save, sender=ReadingSession)
-def update_book_last_time_read(sender, instance, **kwargs):
-    instance.update_last_time_read()
-
-
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     last_activity = models.DateTimeField(null=True, blank=True)
@@ -128,23 +120,3 @@ class Profile(models.Model):
             self.last_book_read = None
 
         self.save()
-
-
-@receiver(post_save, sender=ReadingSession)
-def update_profile_last_activity(sender, instance, **kwargs):
-    instance.user.profile.last_activity = instance.start_time
-    instance.user.profile.save()
-
-
-# Signal to update the last_book_read when a ReadingSession is saved
-@receiver(post_save, sender=ReadingSession)
-def update_profile_last_book_read(sender, instance, **kwargs):
-    profile = instance.user.profile
-    profile.update_reading_sessions_count()
-
-
-# Signal to handle the deletion of a ReadingSession and update last_book_read accordingly
-@receiver(pre_delete, sender=ReadingSession)
-def handle_deleted_reading_session(sender, instance, **kwargs):
-    profile = instance.user.profile
-    profile.update_reading_sessions_count()

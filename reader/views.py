@@ -47,18 +47,6 @@ class ReadingSessionViewSet(
             "book"
         )
 
-    def perform_create(self, serializer):
-        # Set the 'user' field based on the logged-in user
-        serializer.save(user=self.request.user)
-
-        # Update the number_of_reading_sessions and last_activity in the associated Profile and total reading time
-        profile = self.request.user.profile
-        profile.update_reading_sessions_count()
-        profile.calculate_total_reading_time_for_user()
-        profile.get_last_book_read()
-        profile.last_activity = serializer.instance.start_time
-        profile.save()
-
     def create(self, request, *args, **kwargs):
         # Check if the user already has an active session and stop it
         active_sessions = ReadingSession.objects.filter(

@@ -70,6 +70,24 @@ class ReadingSessionSerializer(serializers.ModelSerializer):
     def get_duration(obj):
         return obj.calculate_duration()
 
+    def create(self, validated_data):
+        # Set the 'user' field based on the logged-in user
+        user = self.context["request"].user
+        validated_data["user"] = user
+
+        # Create the reading session instance
+        reading_session = super().create(validated_data)
+
+        # Update the number_of_reading_sessions and last_activity in the associated Profile
+        profile = user.profile
+        profile.update_reading_sessions_count()
+        profile.calculate_total_reading_time_for_user()
+        profile.get_last_book_read()
+        profile.last_activity = reading_session.start_time
+        profile.save()
+
+        return reading_session
+
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -89,7 +107,5 @@ class ProfileSerializer(serializers.ModelSerializer):
             "last_book_read",
         )
 
-
-# create profile from serializers
 # Django channels
 # adding extra services

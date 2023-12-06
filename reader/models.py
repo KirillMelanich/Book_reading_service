@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.db import models
+from django.db.models import ExpressionWrapper, Sum, F, fields
 from django.utils import timezone
 
 
@@ -20,22 +21,30 @@ class Book(models.Model):
         return f"{self.id}"
 
     def total_reading_time_for_user(self, user):
-        sessions = ReadingSession.objects.filter(
+        total_duration = ReadingSession.objects.filter(
             user=user, book=self, end_time__isnull=False
-        )
-        total_duration = sum(
-            (session.calculate_duration() for session in sessions), timedelta()
-        )
+        ).aggregate(
+            total_duration=ExpressionWrapper(
+                Sum(F("end_time") - F("start_time")),
+                output_field=fields.DurationField(),
+            )
+        )["total_duration"] or timedelta()
+
         return total_duration
 
     def total_number_of_reading_sessions_for_all_users(self):
         return ReadingSession.objects.filter(book=self).count()
 
     def total_reading_time_for_all_users(self):
-        sessions = ReadingSession.objects.filter(book=self, end_time__isnull=False)
-        total_duration = sum(
-            (session.calculate_duration() for session in sessions), timedelta()
-        )
+        total_duration = ReadingSession.objects.filter(
+             book=self, end_time__isnull=False
+        ).aggregate(
+            total_duration=ExpressionWrapper(
+                Sum(F("end_time") - F("start_time")),
+                output_field=fields.DurationField(),
+            )
+        )["total_duration"] or timedelta()
+
         return total_duration
 
 
@@ -95,16 +104,16 @@ class Profile(models.Model):
         self.save()
 
     def calculate_total_reading_time_for_user(self):
-        sessions = ReadingSession.objects.filter(user=self.user, end_time__isnull=False)
-        total_duration = sum(
-            (session.calculate_duration() for session in sessions), timedelta()
-        )
+        total_duration = ReadingSession.objects.filter(
+            user=self.user, end_time__isnull=False
+        ).aggregate(
+            total_duration=ExpressionWrapper(
+                Sum(F("end_time") - F("start_time")),
+                output_field=fields.DurationField(),
+            )
+        )["total_duration"] or timedelta()
+
         self.total_reading_time = total_duration
-
-        # total_duration = ReadingSession.objects.filter(
-        #     user=self.user, end_time__isnull=False
-        # ).aggregate(total_duration=Sum("duration"))["total_duration"] or timedelta()
-
         self.save()
 
     def get_last_book_read(self):

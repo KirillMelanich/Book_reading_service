@@ -16,24 +16,9 @@ This API allows an authorized user to read books and measure the time of reading
 - JWT authentication
 - Pytest
 - Drf-spectacular
-- Docker
 - Debug Toolbar
 
-## Installation with Docker
-1. Clone the repository:
-   ```shell
-   git clone https://github.com/KirillMelanich/Book_reading_service
-   
-2. Launch project with docker-compose using terminal commands:
-   ```shell
-    docker-compose up
-
-3. Create Superuser:
-   ```shell
-    docker exec -it book_reading_service-app-1 python manage.py createsuperuser   
-Don't forget to change 0.0.0.0:8000 port in your browser search line to 127.0.0.1:8000
-
-## Installation without Docker
+## Installation 
 1. Clone the repository:
    ```shell
    git clone https://github.com/KirillMelanich/Book_reading_service

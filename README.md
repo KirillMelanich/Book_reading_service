@@ -39,9 +39,9 @@ Don't forget to change 0.0.0.0:8000 port in your browser search line to 127.0.0.
    ```shell
    git clone https://github.com/KirillMelanich/Book_reading_service
    
-2. If not using docker navigate to the project directory and activate virtual environment:
+2. Navigate to the project directory and activate virtual environment:
    ```shell
-   cd crypto_staking_platform
+   cd book_reading_service
    python -m venv venv
    venv\Scripts\activate (on Windows)
    source venv/bin/activate (on macOS)
@@ -49,13 +49,17 @@ Don't forget to change 0.0.0.0:8000 port in your browser search line to 127.0.0.
 3. Use `.env_sample` file as a template and create `.env` file with your settings
     . Don't forget to change your database settings for your local database
 
-4. Run app
-   ```shell
-   python manage.py runserver
-5. Run migrations and create superuser:
+4. Run migrations
    ```shell
    python manage.py makemigrations
    python manage.py migrate
+
+5. Create superuser
+   ```shell
    python manage.py createsuperuser
+ 
+6. Run server:
+   ```shell
+   python manage.py runserver
    
-6. Enjoy Book Reading Service
+7. Enjoy Book Reading Service

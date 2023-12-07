@@ -54,6 +54,8 @@ Don't forget to change 0.0.0.0:8000 port in your browser search line to 127.0.0.
    python manage.py runserver
 5. Create superuser:
    ```shell
+   python manage.py makemigrations
+   python manage.py migrate
    python manage.py createsuperuser
    
 6. Enjoy Book Reading Service

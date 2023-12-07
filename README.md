@@ -1,4 +1,3 @@
-## Kyrylo Melanich Test Task for Globaldev
 # Book Reading Service
 This API allows an authorized user to read books and measure the time of reading sessions
 ### Main rules:

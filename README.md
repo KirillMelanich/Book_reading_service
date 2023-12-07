@@ -52,7 +52,7 @@ Don't forget to change 0.0.0.0:8000 port in your browser search line to 127.0.0.
 4. Run app
    ```shell
    python manage.py runserver
-5. Create superuser:
+5. Run migrations and create superuser:
    ```shell
    python manage.py makemigrations
    python manage.py migrate

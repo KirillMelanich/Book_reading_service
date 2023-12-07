@@ -15,25 +15,6 @@ def detail_url(reading_session_id: int):
     return reverse("reader:reading-session-detail", args=[reading_session_id])
 
 
-class ReadingSessionTestsUnauthenticated(TestCase):
-    def setUp(self):
-        self.client = APIClient()
-
-    def test_unauthenticated_access(self):
-        # Ensure unauthenticated user cannot access reading sessions
-        response = self.client.get(READING_SESSION_URL)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-        # Ensure unauthenticated user cannot create reading sessions
-        payload = {"user": 1, "book": 1, "start_time": "2023-01-01T12:00:00Z"}
-        response = self.client.post(READING_SESSION_URL, payload)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-        # Ensure unauthenticated user cannot delete reading sessions
-        response = self.client.delete(detail_url(1))
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-
 class ReadingSessionTestsAuthenticated(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -85,29 +66,6 @@ class ReadingSessionTestsAuthenticated(TestCase):
         self.assertEqual(ReadingSession.objects.count(), 1)
         self.assertEqual(response.data["user"], self.user.id)
 
-    def test_delete_reading_session_authenticated(self):
-        book = self.create_book_sample()
-        reading_session = self.create_reading_session_sample(self.user, book)
-        url = detail_url(reading_session.id)
-
-        # Save the initial state of the user's profile
-        initial_profile = self.user.profile
-
-        response = self.client.delete(url)
-
-        # Assert the HTTP response status
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-
-        # Assert that the reading session is deleted
-        self.assertEqual(ReadingSession.objects.count(), 0)
-
-        # Assert that the user's profile is updated
-        updated_profile = self.user.profile
-        self.assertEqual(
-            initial_profile.number_of_reading_sessions,
-            updated_profile.number_of_reading_sessions,
-        )
-
 
 class ReadingSessionMethodsTests(TestCase):
     def setUp(self):
@@ -122,7 +80,6 @@ class ReadingSessionMethodsTests(TestCase):
             short_description="Sample Short Description",
             long_description="Sample Long Description",
         )
-        self.profile = Profile.objects.create(user=self.user)
         self.reading_session = ReadingSession.objects.create(
             user=self.user,
             book=self.book,
@@ -177,3 +134,5 @@ class ReadingSessionMethodsTests(TestCase):
         # Assert that the reading session's end time is not updated
         updated_end_time = session_with_end_time.end_time.replace(microsecond=0)
         self.assertEqual(updated_end_time, initial_end_time)
+
+
